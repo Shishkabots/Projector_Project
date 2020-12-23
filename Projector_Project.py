@@ -3,13 +3,12 @@ import os #maybe needed for RPI
 import time #might be helpful
 #from shapely.geometry import Polygon #need to install shapely
 
+
 totalDims = 5
 squareWidth = 2 # this needs to change -> corresponds to the x
 squareHeight = 2 # this needs to change -> corresponds to the y
-distanceReadings = [5.65, 4.12, 5.94, 4.2] #feet or meters
-angleReadings = [43.2, 41.4, 53.5, 48.5] #radians or degrees
-xDistances = [0.0] * len(distanceReadings)
-yDistances = [0.0] * len(distanceReadings)
+# distanceReadings = [5.65, 4.12, 5.94, 4.2] #feet or meters
+# angleReadings = [43.2, 41.4, 53.5, 48.5] #radians or degrees
 
 #with open('data.rtf') as f:
  #   while True:
@@ -18,17 +17,39 @@ yDistances = [0.0] * len(distanceReadings)
     #            break 
      #       print(c)
 
-def convertToXY(distanceReadings):
+def readFileData(file):
+    fp = open(file)
+    angleReadings = []
+    distanceReadings = []
+    nums = []
+    all_lines = fp.readlines()
+
+    all_lines = all_lines[3:]
+    for line in all_lines:
+        nums = line.strip().split(' ')
+        ang = int(float(nums[0]))
+        if ang > 270:
+            angleReadings.append(ang % 270)
+            distanceReadings.append(nums[1])
+    print(len(angleReadings))
+    print(len(distanceReadings))
+    fp.close()     
+    return (angleReadings, distanceReadings)
+
+def convertToXY(angleReadings, distanceReadings):
     xSum = 0
     ySum = 0
+    xDistances = [0.0] * len(distanceReadings)
+    yDistances = [0.0] * len(distanceReadings)
+    
     for indx in range(len(distanceReadings)):
-        xDistances[indx] = distanceReadings[indx] * math.cos(math.radians(angleReadings[indx]))
-        yDistances[indx] = distanceReadings[indx] * math.sin(math.radians(angleReadings[indx]))
+        xDistances[indx] = float(distanceReadings[indx]) * math.cos(math.radians(angleReadings[indx]))
+        yDistances[indx] = float(distanceReadings[indx]) * math.sin(math.radians(angleReadings[indx]))
 
     for entry in range(len(distanceReadings)):
         xSum += xDistances[entry]
         ySum += yDistances[entry]
-        print("x distance: %f :: y distance: %f" % (xDistances[entry], yDistances[entry]))
+        #print("x distance: %f :: y distance: %f" % (xDistances[entry], yDistances[entry]))
 
     return (xSum, ySum, xDistances, yDistances)
 
@@ -46,7 +67,9 @@ def finalLocalization(xSum, ySum, xDistances, yDistances):
     print("Final mapped coordinates: %d, %d" % (finalXLocation, finalYLocation))
 
 
-results = convertToXY(distanceReadings)
+
+angleReadings, distanceReadings = readFileData('sample_data.txt')
+results = convertToXY(angleReadings, distanceReadings)
 finalLocalization(results[0], results[1], results[2], results[3])
 
 
