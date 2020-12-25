@@ -1,0 +1,95 @@
+#Isolating which points to use
+#points should be at most some "separation" distance from each other
+#if difference in x distances between two points is > max separation, exclude 
+import math
+import os #maybe needed for RPI
+import time #might be helpful
+#from shapely.geometry import Polygon #need to install shapely
+
+totalDims = 5
+xBorder = 1700 # this needs to change -> corresponds to the x
+yBorder = 1700 # this needs to change -> corresponds to the y
+lz1xmax = xBorder/3
+lz1ymax = yBorder/3
+lz2xmin = 2 * xBorder/3
+lz2ymin = 2 * yBorder/3
+# distanceReadings = [5.65, 4.12, 5.94, 4.2] #feet or meters
+# angleReadings = [43.2, 41.4, 53.5, 48.5] #radians or degrees
+
+#with open('data.rtf') as f:
+ #   while True:
+  #          c = f.read(1)
+   #         if not c:
+    #            break 
+     #       print(c)
+
+def readFileData(file):
+    fp = open(file)
+    angleReadings = []
+    distanceReadings = []
+    nums = []
+    all_lines = fp.readlines()
+
+    all_lines = all_lines[3:]
+    for line in all_lines:
+        nums = line.strip().split(' ')
+        ang = int(float(nums[0]))
+        if (ang >= 90) and (ang <= 180):
+            angleReadings.append(ang - 90)
+            distanceReadings.append(nums[1])
+    print(len(angleReadings))
+    print(len(distanceReadings))
+    fp.close()     
+    return (angleReadings, distanceReadings)
+
+def convertToXY(angleReadings, distanceReadings):
+    xSum = 0
+    ySum = 0
+    xDistancesList = []
+    yDistancesList = []
+    
+    for indx in range(len(distanceReadings)):
+        xPos = (float(distanceReadings[indx]) * math.cos(math.radians(angleReadings[indx])))
+        yPos = (float(distanceReadings[indx]) * math.sin(math.radians(angleReadings[indx])))
+        if xPos <= xBorder and yPos <= yBorder:
+          xDistancesList.append (xPos)
+          yDistancesList.append (yPos)
+
+    for entry in range(len(xDistancesList)):
+        xSum += xDistancesList[entry]
+        ySum += yDistancesList[entry]
+        #print("x distance: %f :: y distance: %f" % (xDistancesList[entry], yDistances[entry]))
+
+    return (xSum, ySum, xDistancesList, yDistancesList)
+
+####Assuming the person is represented as a point####
+def finalLocalization(xSum, ySum, xDistancesList, yDistancesList):
+    x1 = (xSum / len(xDistancesList))
+    y1 = (ySum / len(yDistancesList))
+    xAvg = ((xSum / len(xDistancesList)) * 100) / 100
+    yAvg = ((ySum / len(yDistancesList)) * 100) / 100
+    print("\nUnrounded raw coordinates: %f, %f" % (x1, y1))
+    print("Initial raw coordinates: %d, %d" % (xAvg, yAvg))
+    coordinates = xAvg, yAvg
+    if (xAvg < lz1xmax and yAvg < lz1ymax):
+      print ("\n live zone 1")
+      print (coordinates)
+    if (xAvg > lz1xmax or yAvg > lz1ymax) and (xAvg < lz2xmin or yAvg < lz2ymin):
+      print ("\n deadzone")
+      print (coordinates)
+    if (xAvg > lz2xmin and yAvg > lz2ymin):
+      print ("\n live zone 2")
+      print (coordinates)
+    
+    #finalXLocation = xAvg / squareWidth
+    #finalYLocation = (yAvg / squareHeight)
+    #print("Final mapped coordinates: %d, %d" % (finalXLocation, finalYLocation))
+
+angleReadings, distanceReadings = readFileData('data2-4.txt')
+results = convertToXY(angleReadings, distanceReadings)
+finalLocalization(results[0], results[1], results[2], results[3])
+
+####Assuming the person is represented as a circle####
+#personPolygon = Polygon([(4.118673, 3.867691), (3.090458, 2.724605), (3.533247, 4.774910), (2.783004, 3.145614)])
+#objectPolygon = Polygon([()]) #predetermined coordinates that will be stored separately somewhere else
+#gridPolygon = Polygon([()]) #this is the harder part -> now we are trying to find 4 points instead of 1
