@@ -29,6 +29,26 @@ for i, scan in enumerate(lidar.iter_scans()):
             if i > 10:
                 break
             print("---------------")
+            
+def convertToXY(angleReadings, distanceReadings):
+    xSum = 0
+    ySum = 0
+    xDistancesList = []
+    yDistancesList = []
+    
+    for indx in range(len(distanceReadings)):
+        xPos = (float(distanceReadings[indx]) * math.cos(math.radians(angleReadings[indx])))
+        yPos = (float(distanceReadings[indx]) * math.sin(math.radians(angleReadings[indx])))
+        if xPos <= xBorder and yPos <= yBorder:
+          xDistancesList.append (xPos)
+          yDistancesList.append (yPos)
+
+    for entry in range(len(xDistancesList)):
+        xSum += xDistancesList[entry]
+        ySum += yDistancesList[entry]
+        #print("x distance: %f :: y distance: %f" % (xDistancesList[entry], yDistances[entry]))
+
+    return (xSum, ySum, xDistancesList, yDistancesList)
 
 lidar.stop()
 lidar.stop_motor()
