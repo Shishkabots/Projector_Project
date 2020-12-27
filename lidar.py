@@ -37,8 +37,8 @@ def convertToXY(angleReadings, distanceReadings):
     yDistancesList = []
     
     for indx in range(len(distanceReadings)):
-        xPos = (float(distanceReadings[indx]) * math.cos(math.radians(angleReadings[indx])))
-        yPos = (float(distanceReadings[indx]) * math.sin(math.radians(angleReadings[indx])))
+        xPos = (float(distanceReadings) * math.cos(math.radians(angleReadings)))
+        yPos = (float(distanceReadings) * math.sin(math.radians(angleReadings)))
         if xPos <= xBorder and yPos <= yBorder:
           xDistancesList.append (xPos)
           yDistancesList.append (yPos)
