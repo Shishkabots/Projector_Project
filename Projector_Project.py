@@ -5,8 +5,8 @@ import time #might be helpful
 
 
 totalDims = 5
-squareWidth =  1800 # this needs to change -> corresponds to the x
-squareHeight = 1500 # this needs to change -> corresponds to the y
+squareWidth =  1700 # this needs to change -> corresponds to the x
+squareHeight = 1400 # this needs to change -> corresponds to the y
 lswidth = squareWidth/3
 lsheight = squareHeight/3
 lswidth2 = 2 * squareWidth/3
@@ -21,6 +21,7 @@ lsheight2 = 2 * squareHeight/3
     #            break 
      #       print(c)
 
+    #This reads the file data
 def readFileData(file):
     fp = open(file)
     angleReadings = []
@@ -91,7 +92,7 @@ def finalLocalization(xSum, ySum, xDistances, yDistances):
 
 
 
-angleReadings, distanceReadings = readFileData('livetest4.txt')
+angleReadings, distanceReadings = readFileData('livetest2.txt')
 results = convertToXY(angleReadings, distanceReadings)
 #finalLocalization(results[0], results[1], results[2], results[3])
 
